@@ -1,0 +1,35 @@
+# Banco de desenvolvimento local. A API roda fora do compose:
+#
+#   docker compose up -d
+#   ./mvnw spring-boot:run
+#
+# Mesma imagem e mesmas credenciais usadas pelos workflows do GitHub Actions,
+# para o ambiente local bater com o da CI. O Flyway aplica as migrations no
+# start da aplicação.
+#
+# Se a porta 5432 já estiver ocupada por um Postgres da máquina, suba com
+# outra porta e aponte a aplicação para ela:
+#
+#   AGENDA_DB_PORT=5433 docker compose up -d
+#   SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/agenda_clientes ./mvnw spring-boot:run
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: agenda-clientes-db
+    environment:
+      POSTGRES_DB: agenda_clientes
+      POSTGRES_USER: agenda
+      POSTGRES_PASSWORD: agenda
+    ports:
+      - "${AGENDA_DB_PORT:-5432}:5432"
+    volumes:
+      - agenda-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agenda -d agenda_clientes"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  agenda-db-data:
