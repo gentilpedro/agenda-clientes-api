@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.agendaclientes</groupId>
 	<artifactId>agenda-clientes-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<name>agenda-clientes-api</name>
 	<description>Agenda de clientes MVP</description>
 	<url/>
