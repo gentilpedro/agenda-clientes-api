@@ -12,4 +12,6 @@ public interface UsuarioRepository {
     Optional<Usuario> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    Optional<Usuario> findByWhatsappPhoneNumberId(String phoneNumberId);
 }

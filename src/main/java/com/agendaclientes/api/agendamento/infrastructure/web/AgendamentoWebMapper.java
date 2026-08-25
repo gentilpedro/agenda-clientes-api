@@ -14,6 +14,8 @@ class AgendamentoWebMapper {
                 agendamento.getDataHora(),
                 agendamento.getDuracaoMinutos(),
                 agendamento.getStatus(),
-                agendamento.getObservacoes());
+                agendamento.getObservacoes(),
+                agendamento.isConfirmado(),
+                agendamento.getLembreteEnviadoEm());
     }
 }

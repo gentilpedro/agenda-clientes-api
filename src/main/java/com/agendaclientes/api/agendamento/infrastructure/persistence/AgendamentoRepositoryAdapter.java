@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.agendaclientes.api.agendamento.domain.Agendamento;
 import com.agendaclientes.api.agendamento.domain.AgendamentoRepository;
+import com.agendaclientes.api.agendamento.domain.AgendamentoStatus;
 
 @Repository
 class AgendamentoRepositoryAdapter implements AgendamentoRepository {
@@ -29,7 +30,9 @@ class AgendamentoRepositoryAdapter implements AgendamentoRepository {
                 agendamento.getDataHora(),
                 agendamento.getDuracaoMinutos(),
                 agendamento.getStatus(),
-                agendamento.getObservacoes());
+                agendamento.getObservacoes(),
+                agendamento.isConfirmado(),
+                agendamento.getLembreteEnviadoEm());
         AgendamentoJpaEntity saved = jpaRepository.save(entity);
         return toDomain(saved);
     }
@@ -56,6 +59,24 @@ class AgendamentoRepositoryAdapter implements AgendamentoRepository {
     }
 
     @Override
+    public List<Agendamento> findByUsuarioIdAndClienteIdAndStatus(UUID usuarioId, UUID clienteId,
+            AgendamentoStatus status) {
+        return jpaRepository.findByUsuarioIdAndClienteIdAndStatus(usuarioId, clienteId, status).stream()
+                .map(AgendamentoRepositoryAdapter::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Agendamento> findElegiveisParaLembrete(Instant janelaInicio, Instant janelaFim) {
+        return jpaRepository
+                .findByStatusAndLembreteEnviadoEmIsNullAndDataHoraBetween(AgendamentoStatus.AGENDADO, janelaInicio,
+                        janelaFim)
+                .stream()
+                .map(AgendamentoRepositoryAdapter::toDomain)
+                .toList();
+    }
+
+    @Override
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
     }
@@ -73,6 +94,8 @@ class AgendamentoRepositoryAdapter implements AgendamentoRepository {
                 entity.getDataHora(),
                 entity.getDuracaoMinutos(),
                 entity.getStatus(),
-                entity.getObservacoes());
+                entity.getObservacoes(),
+                entity.isConfirmado(),
+                entity.getLembreteEnviadoEm());
     }
 }

@@ -15,6 +15,11 @@ public interface AgendamentoRepository {
 
     List<Agendamento> findByUsuarioIdAndPeriodo(UUID usuarioId, Instant inicio, Instant fimExclusivo);
 
+    List<Agendamento> findByUsuarioIdAndClienteIdAndStatus(UUID usuarioId, UUID clienteId, AgendamentoStatus status);
+
+    /** Não é filtrada por usuário: o job de lembrete roda entre todos os tenants. */
+    List<Agendamento> findElegiveisParaLembrete(Instant janelaInicio, Instant janelaFim);
+
     void deleteById(UUID id);
 
     boolean existsByIdAndUsuarioId(UUID id, UUID usuarioId);

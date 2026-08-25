@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.agendaclientes.api.agendamento.domain.AgendamentoStatus;
+
 interface SpringDataAgendamentoRepository extends JpaRepository<AgendamentoJpaEntity, UUID> {
 
     Optional<AgendamentoJpaEntity> findByIdAndUsuarioId(UUID id, UUID usuarioId);
@@ -17,4 +19,10 @@ interface SpringDataAgendamentoRepository extends JpaRepository<AgendamentoJpaEn
 
     List<AgendamentoJpaEntity> findByUsuarioIdAndDataHoraGreaterThanEqualAndDataHoraLessThan(
             UUID usuarioId, Instant inicio, Instant fimExclusivo);
+
+    List<AgendamentoJpaEntity> findByUsuarioIdAndClienteIdAndStatus(UUID usuarioId, UUID clienteId,
+            AgendamentoStatus status);
+
+    List<AgendamentoJpaEntity> findByStatusAndLembreteEnviadoEmIsNullAndDataHoraBetween(
+            AgendamentoStatus status, Instant janelaInicio, Instant janelaFim);
 }

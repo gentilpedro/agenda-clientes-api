@@ -13,5 +13,8 @@ public record AgendamentoResponse(
         @Schema(example = "2026-08-20T14:30:00Z") Instant dataHora,
         @Schema(example = "60") Integer duracaoMinutos,
         AgendamentoStatus status,
-        @Schema(example = "Primeira consulta") String observacoes) {
+        @Schema(example = "Primeira consulta") String observacoes,
+        @Schema(description = "Se o cliente confirmou presença pelo WhatsApp") boolean confirmado,
+        @Schema(description = "Quando o lembrete de confirmação foi enviado pelo WhatsApp, se já foi",
+                example = "2026-08-19T14:30:00Z") Instant lembreteEnviadoEm) {
 }

@@ -10,4 +10,6 @@ interface SpringDataUsuarioRepository extends JpaRepository<UsuarioJpaEntity, UU
     Optional<UsuarioJpaEntity> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    Optional<UsuarioJpaEntity> findByWhatsappPhoneNumberId(String phoneNumberId);
 }

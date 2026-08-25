@@ -33,11 +33,31 @@ public class UsuarioJpaEntity {
     @Column(name = "reset_token_expira_em")
     private Instant resetTokenExpiraEm;
 
+    @Column(name = "whatsapp_waba_id")
+    private String whatsappWabaId;
+
+    @Column(name = "whatsapp_phone_number_id")
+    private String whatsappPhoneNumberId;
+
+    @Column(name = "whatsapp_numero_exibicao")
+    private String whatsappNumeroExibicao;
+
+    @Column(name = "whatsapp_token_acesso_criptografado")
+    private String whatsappTokenAcessoCriptografado;
+
+    @Column(name = "whatsapp_conectado_em")
+    private Instant whatsappConectadoEm;
+
+    @Column(name = "whatsapp_template_status")
+    private String whatsappTemplateStatus;
+
     protected UsuarioJpaEntity() {
     }
 
     public UsuarioJpaEntity(UUID id, String nome, String email, String senhaHash, Instant criadoEm,
-            String resetTokenHash, Instant resetTokenExpiraEm) {
+            String resetTokenHash, Instant resetTokenExpiraEm, String whatsappWabaId, String whatsappPhoneNumberId,
+            String whatsappNumeroExibicao, String whatsappTokenAcessoCriptografado, Instant whatsappConectadoEm,
+            String whatsappTemplateStatus) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -45,6 +65,12 @@ public class UsuarioJpaEntity {
         this.criadoEm = criadoEm;
         this.resetTokenHash = resetTokenHash;
         this.resetTokenExpiraEm = resetTokenExpiraEm;
+        this.whatsappWabaId = whatsappWabaId;
+        this.whatsappPhoneNumberId = whatsappPhoneNumberId;
+        this.whatsappNumeroExibicao = whatsappNumeroExibicao;
+        this.whatsappTokenAcessoCriptografado = whatsappTokenAcessoCriptografado;
+        this.whatsappConectadoEm = whatsappConectadoEm;
+        this.whatsappTemplateStatus = whatsappTemplateStatus;
     }
 
     public UUID getId() {
@@ -73,5 +99,29 @@ public class UsuarioJpaEntity {
 
     public Instant getResetTokenExpiraEm() {
         return resetTokenExpiraEm;
+    }
+
+    public String getWhatsappWabaId() {
+        return whatsappWabaId;
+    }
+
+    public String getWhatsappPhoneNumberId() {
+        return whatsappPhoneNumberId;
+    }
+
+    public String getWhatsappNumeroExibicao() {
+        return whatsappNumeroExibicao;
+    }
+
+    public String getWhatsappTokenAcessoCriptografado() {
+        return whatsappTokenAcessoCriptografado;
+    }
+
+    public Instant getWhatsappConectadoEm() {
+        return whatsappConectadoEm;
+    }
+
+    public String getWhatsappTemplateStatus() {
+        return whatsappTemplateStatus;
     }
 }

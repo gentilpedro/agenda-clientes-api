@@ -37,11 +37,17 @@ public class AgendamentoJpaEntity {
 
     private String observacoes;
 
+    @Column(nullable = false)
+    private boolean confirmado;
+
+    @Column(name = "lembrete_enviado_em")
+    private Instant lembreteEnviadoEm;
+
     protected AgendamentoJpaEntity() {
     }
 
     public AgendamentoJpaEntity(UUID id, UUID usuarioId, UUID clienteId, Instant dataHora, Integer duracaoMinutos,
-            AgendamentoStatus status, String observacoes) {
+            AgendamentoStatus status, String observacoes, boolean confirmado, Instant lembreteEnviadoEm) {
         this.id = id;
         this.usuarioId = usuarioId;
         this.clienteId = clienteId;
@@ -49,6 +55,8 @@ public class AgendamentoJpaEntity {
         this.duracaoMinutos = duracaoMinutos;
         this.status = status;
         this.observacoes = observacoes;
+        this.confirmado = confirmado;
+        this.lembreteEnviadoEm = lembreteEnviadoEm;
     }
 
     public UUID getId() {
@@ -77,5 +85,13 @@ public class AgendamentoJpaEntity {
 
     public String getObservacoes() {
         return observacoes;
+    }
+
+    public boolean isConfirmado() {
+        return confirmado;
+    }
+
+    public Instant getLembreteEnviadoEm() {
+        return lembreteEnviadoEm;
     }
 }
