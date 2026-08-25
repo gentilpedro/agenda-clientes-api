@@ -1,0 +1,7 @@
+target
+.git
+.github
+.mvn
+.claude
+*.md
+openapi.json
