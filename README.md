@@ -40,8 +40,9 @@ Com a aplicação no ar, a documentação completa dos endpoints (schemas, exemp
 
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Produção: https://agenda-api.aamora.com.br/swagger-ui.html
 
-A doc é pública em desenvolvimento (liberada na `SecurityConfig`). Em produção, pode ser desativada via `SPRINGDOC_API_DOCS_ENABLED=false` e `SPRINGDOC_SWAGGER_UI_ENABLED=false`.
+A doc é pública (liberada na `SecurityConfig`), também em produção. Para desativá-la, use `SPRINGDOC_API_DOCS_ENABLED=false` e `SPRINGDOC_SWAGGER_UI_ENABLED=false`.
 
 Para chamar os endpoints protegidos pelo Swagger UI: faça login em `POST /api/auth/login`, copie o `token` da resposta e cole no botão **Authorize**.
 

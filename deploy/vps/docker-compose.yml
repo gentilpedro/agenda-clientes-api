@@ -21,10 +21,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD}"
       # O Nginx do host chega pelo gateway 172.30.1.1 (rede privada, confiável para o Tomcat):
       # lê X-Forwarded-For/Proto para IP real e esquema https.
+      # Também faz o Swagger montar as URLs com https://agenda-api.aamora.com.br.
       SERVER_FORWARD_HEADERS_STRATEGY: native
-      # Swagger desligado em produção.
-      SPRINGDOC_API_DOCS_ENABLED: "false"
-      SPRINGDOC_SWAGGER_UI_ENABLED: "false"
       PROXY_GATEWAY: 172.30.1.1
     networks: [agenda-api]
     depends_on:
