@@ -123,4 +123,18 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tokenDev").doesNotExist());
     }
+
+    @Test
+    void esqueciSenha_naoDeveDevolverOTokenQuandoEmailExiste() throws Exception {
+        when(authService.esqueciSenha("maria@email.com")).thenReturn("token-de-reset");
+
+        mockMvc.perform(post("/api/auth/esqueci-senha")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"email":"maria@email.com"}
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensagem").exists())
+                .andExpect(jsonPath("$.tokenDev").doesNotExist());
+    }
 }

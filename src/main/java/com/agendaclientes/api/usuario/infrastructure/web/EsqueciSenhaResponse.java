@@ -1,15 +1,9 @@
 package com.agendaclientes.api.usuario.infrastructure.web;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 /**
- * Não há envio de email configurado nesta API ainda: o token de redefinição
- * (quando o email existe) é devolvido diretamente na resposta para o
- * frontend exibir em modo de desenvolvimento, em vez de ser enviado por
- * email de verdade.
+ * Não devolve o token de redefinição: ele só pode chegar ao dono da conta
+ * por um canal próprio (email), senão qualquer um que saiba o email de um
+ * usuário consegue trocar a senha dele.
  */
-public record EsqueciSenhaResponse(
-        String mensagem,
-        @Schema(description = "Token de redefinição. Provisório: existe porque ainda não há envio de "
-                + "email configurado. Vem nulo quando a conta não existe.") String tokenDev) {
+public record EsqueciSenhaResponse(String mensagem) {
 }

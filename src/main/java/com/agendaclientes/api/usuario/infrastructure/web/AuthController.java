@@ -51,15 +51,12 @@ public class AuthController {
     @Operation(summary = "Solicita a redefinição de senha",
             description = """
                     Responde sempre 200, exista ou não a conta, para não revelar quais emails estão \
-                    cadastrados. Como ainda não há envio de email configurado, o token vem no campo \
-                    `tokenDev` da resposta quando a conta existe.""")
+                    cadastrados. O token de redefinição nunca vem na resposta.""")
     @ApiResponse(responseCode = "200", description = "Solicitação recebida")
     @PostMapping("/esqueci-senha")
     public EsqueciSenhaResponse esqueciSenha(@Valid @RequestBody EsqueciSenhaRequest request) {
-        String token = authService.esqueciSenha(request.email());
-        return new EsqueciSenhaResponse(
-                "Se o email existir, um link de redefinição foi gerado.",
-                token);
+        authService.esqueciSenha(request.email());
+        return new EsqueciSenhaResponse("Se o email existir, um link de redefinição foi gerado.");
     }
 
     @Operation(summary = "Redefine a senha usando o token de redefinição")
