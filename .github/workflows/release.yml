@@ -14,6 +14,9 @@ concurrency:
 jobs:
   build-test-release:
     runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.version.outputs.should_release }}
+      version: ${{ steps.version.outputs.version }}
 
     services:
       postgres:
@@ -90,3 +93,77 @@ jobs:
           name: v${{ steps.version.outputs.version }}
           generate_release_notes: true
           files: target/*.jar
+
+  # Deploy na VPS (https://agenda-api.aamora.com.br) — skill deploy-vps. Fica aqui, e não num
+  # workflow disparado pela tag, porque tag criada com o GITHUB_TOKEN não dispara outro workflow.
+  # A imagem é montada aqui e enviada por SSH com docker save, sem registry. A VPS_SSH_KEY só
+  # consegue rodar "app-deploy agenda-api" no servidor (forced command): não abre shell, não lê
+  # arquivos, não mexe em outra app.
+  deploy-vps:
+    name: Deploy na VPS
+    needs: build-test-release
+    if: needs.build-test-release.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    # Nunca dois deploys ao mesmo tempo, e nunca cancelar um pela metade.
+    concurrency:
+      group: deploy-vps-agenda-api
+      cancel-in-progress: false
+    environment:
+      name: vps
+      url: https://agenda-api.aamora.com.br
+    env:
+      APP: agenda-api
+      VERSION: ${{ needs.build-test-release.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.build-test-release.outputs.version }}
+
+      - name: Montar a imagem
+        run: |
+          docker build -f deploy/vps/Dockerfile --build-arg VERSAO="$VERSION" -t "$APP:$VERSION" .
+          docker save "$APP:$VERSION" | gzip > image.tar.gz
+          ls -lh image.tar.gz
+
+      # VPS_KNOWN_HOSTS fixa a chave do servidor: sem ela o ssh aceitaria qualquer host que
+      # respondesse no IP, e a imagem (e os segredos) iriam para quem estivesse lá.
+      - name: Configurar o SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # Mesmos nomes do SECRETS em deploy/vps/deploy.conf. Valores de uma linha só, sem aspas
+      # simples. APP_CORS_ALLOWED_ORIGINS não é segredo: vem de variável do repositório.
+      - name: Enviar os segredos
+        env:
+          APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
+          APP_CORS_ALLOWED_ORIGINS: ${{ vars.APP_CORS_ALLOWED_ORIGINS }}
+        run: |
+          for nome in APP_JWT_SECRET APP_CORS_ALLOWED_ORIGINS; do
+            [ -n "${!nome}" ] || { echo "::error::$nome não cadastrado no repositório"; exit 1; }
+            printf '%s=%s\n' "$nome" "${!nome}"
+          done | ssh -o BatchMode=yes "deploy@${{ secrets.VPS_HOST }}" set-secrets
+
+      - name: Enviar a imagem
+        run: ssh -o BatchMode=yes "deploy@${{ secrets.VPS_HOST }}" load-image "$VERSION" < image.tar.gz
+
+      # O app-deploy espera o container ficar saudável e volta para a versão anterior se não ficar.
+      - name: Subir a versão
+        run: ssh -o BatchMode=yes "deploy@${{ secrets.VPS_HOST }}" up "$VERSION"
+
+      # Confere de fora, pelo caminho real (Cloudflare → Nginx → container).
+      - name: Conferir o site no ar
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -fsS -m 10 -o /dev/null https://agenda-api.aamora.com.br/actuator/health; then echo "ok"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::https://agenda-api.aamora.com.br/actuator/health não respondeu depois do deploy."
+          exit 1

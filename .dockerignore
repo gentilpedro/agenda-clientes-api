@@ -5,3 +5,7 @@ target
 .claude
 *.md
 openapi.json
+.idea
+.vscode
+*.env
+.env*
