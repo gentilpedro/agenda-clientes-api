@@ -1,0 +1,57 @@
+# agenda-api em produção na VPS (https://agenda-api.aamora.com.br). Cópia em /opt/agenda-api/docker-compose.yml.
+# Quem sobe o serviço web é o /usr/local/bin/app-deploy, com a imagem agenda-api:<versão> enviada
+# pelo próprio deploy (docker save por SSH, sem registry).
+name: agenda-api
+
+services:
+  web:
+    image: agenda-api:${APP_VERSION:?APP_VERSION não definido}
+    restart: unless-stopped
+    # A VPS tem 3,6 GB para todas as apps: confira a soma dos mem_limit no vps_info.sh.
+    # A JVM usa 70% disso de heap (JAVA_TOOL_OPTIONS no Dockerfile).
+    mem_limit: 384m
+    # Só o Nginx do host fala com o app.
+    ports: ["127.0.0.1:5101:8080"]
+    # .env: senha do Postgres, gerada no servidor. secrets.env: escrito a cada deploy (set-secrets):
+    # APP_JWT_SECRET e APP_CORS_ALLOWED_ORIGINS.
+    env_file: [.env, secrets.env]
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/${POSTGRES_DB}"
+      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER}"
+      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD}"
+      # O Nginx do host chega pelo gateway 172.30.1.1 (rede privada, confiável para o Tomcat):
+      # lê X-Forwarded-For/Proto para IP real e esquema https.
+      SERVER_FORWARD_HEADERS_STRATEGY: native
+      # Swagger desligado em produção.
+      SPRINGDOC_API_DOCS_ENABLED: "false"
+      SPRINGDOC_SWAGGER_UI_ENABLED: "false"
+      PROXY_GATEWAY: 172.30.1.1
+    networks: [agenda-api]
+    depends_on:
+      db: { condition: service_healthy }
+
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    mem_limit: 192m
+    env_file: .env
+    command: >
+      postgres -c shared_buffers=48MB -c effective_cache_size=128MB
+               -c max_connections=20 -c work_mem=4MB
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks: [agenda-api]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+
+volumes:
+  pgdata:
+
+networks:
+  agenda-api:
+    ipam:
+      config:
+        - subnet: 172.30.1.0/24
+          gateway: 172.30.1.1
